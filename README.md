@@ -1,8 +1,8 @@
-# Gridline Tic Tac Toe
+# Tic Tac Toe
 
 ## 1. Project overview
 
-Gridline is a browser-based Tic Tac Toe game with an Angular frontend and an ASP.NET Core Web API. The API owns the board, move history, game status, computer moves, undo behavior, and session scoreboard. The browser renders the latest state returned by the server.
+A browser-based Tic Tac Toe game with an Angular frontend and an ASP.NET Core Web API. The API owns the board, move history, game status, computer moves, undo behavior, and session scoreboard. The browser renders the latest state returned by the server.
 
 ## 2. Tech stack
 
@@ -71,7 +71,7 @@ Install Node.js 22 or newer, then run:
 ```powershell
 cd frontend
 npm install
-npm start
+npm run start
 ```
 
 Open `http://localhost:4200`. The Angular dev server proxies `/api` requests to the backend at port 5050.
