@@ -93,3 +93,5 @@ frontend/.nyc_output
 **/wwwroot/dist/
 **/wwwroot/browser/
 backend/TicTacToe.Api/wwwroot/*
+backend/TicTacToe.Tests/TestResults/
+backend/.nuget/

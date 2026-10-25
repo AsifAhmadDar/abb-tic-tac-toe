@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat Code Coverage">
+        <Configuration>
+          <Format>cobertura</Format>
+          <Threshold>90</Threshold>
+          <ThresholdType>line,branch</ThresholdType>
+          <ThresholdStat>total</ThresholdStat>
+          <Exclude>[TicTacToe.Api]Program,[TicTacToe.Api]TicTacToe.Api.Services.Implementations.GameSessionCleanupHostedService</Exclude>
+          <ExcludeByFile>**/Program.cs</ExcludeByFile>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>

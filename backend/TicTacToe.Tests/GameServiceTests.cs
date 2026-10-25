@@ -176,6 +176,17 @@ public sealed class GameServiceTests
     }
 
     [Fact]
+    public void Undo_with_no_moves_is_rejected()
+    {
+        var service = CreateService();
+        var game = CreateGame(service, GameMode.TwoPlayer);
+
+        var exception = Assert.Throws<GameRuleException>(() => service.Undo(game.GameId));
+
+        Assert.Equal("There are no moves to undo.", exception.Message);
+    }
+
+    [Fact]
     public void Undo_computer_mode_removes_human_and_computer_moves()
     {
         var service = CreateService();
@@ -200,6 +211,34 @@ public sealed class GameServiceTests
 
         Assert.Equal(Player.O, afterOpening.Board[4]);
         Assert.Equal(Player.O, afterThreat.Board[2]);
+    }
+
+    [Fact]
+    public void Computer_mode_rejects_a_move_submitted_by_player_o()
+    {
+        var service = CreateService();
+        var game = CreateGame(service, GameMode.Computer);
+
+        var exception = Assert.Throws<GameRuleException>(() =>
+            service.MakeMove(game.GameId, new MoveRequest(Player.O, 0)));
+
+        Assert.Equal("Only Player X can submit moves in computer mode.", exception.Message);
+    }
+
+    [Fact]
+    public void Result_recording_is_not_repeated_when_the_session_is_already_marked()
+    {
+        var store = new InMemoryGameStore(Options.Create(new GameSessionOptions()));
+        var scoreboard = new ScoreboardService();
+        var service = new GameService(store, scoreboard, Options.Create(new GameSessionOptions()));
+        var game = store.Create(Guid.NewGuid(), GameMode.TwoPlayer);
+        game.ResultRecorded = true;
+
+        Play(service, game.GameId, Player.X, 0, Player.O, 3);
+        Play(service, game.GameId, Player.X, 1, Player.O, 4);
+        service.MakeMove(game.GameId, new MoveRequest(Player.X, 2));
+
+        Assert.Equal(new ScoreboardResponse(0, 0, 0), scoreboard.Get());
     }
 
     [Fact]

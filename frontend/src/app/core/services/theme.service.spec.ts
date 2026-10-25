@@ -30,4 +30,13 @@ describe('ThemeService', () => {
     service.toggle();
     expect(service.theme()).toBe('dark');
   });
+
+  it('restores the light theme selected before a browser refresh', () => {
+    localStorage.setItem('tic-tac-toe-theme', 'light');
+
+    const service = TestBed.inject(ThemeService);
+
+    expect(service.theme()).toBe('light');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+  });
 });

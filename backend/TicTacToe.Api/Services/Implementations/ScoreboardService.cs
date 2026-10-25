@@ -24,7 +24,8 @@ public sealed class ScoreboardService : IScoreboardService
             {
                 Player.X => _scoreboard with { XWins = _scoreboard.XWins + 1 },
                 Player.O => _scoreboard with { OWins = _scoreboard.OWins + 1 },
-                null => _scoreboard with { Draws = _scoreboard.Draws + 1 }
+                null => _scoreboard with { Draws = _scoreboard.Draws + 1 },
+                _ => throw new ArgumentOutOfRangeException(nameof(winner), winner, "The winner is not a supported player.")
             };
         }
     }
