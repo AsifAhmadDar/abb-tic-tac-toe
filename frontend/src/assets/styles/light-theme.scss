@@ -1,0 +1,6 @@
+@use './light-variables' as variables;
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  @include variables.emit-theme;
+}

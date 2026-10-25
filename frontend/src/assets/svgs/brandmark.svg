@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img">
+  <title>Tic Tac Toe mark</title>
+  <rect width="24" height="24" rx="6" fill="#D7FF66"/>
+  <path d="M8 5.5v13M16 5.5v13M5.5 8h13M5.5 16h13" stroke="#0A0C0F" stroke-width="1.4" stroke-linecap="round"/>
+  <path d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5" stroke="#0A0C0F" stroke-width="1.5" stroke-linecap="round"/>
+</svg>

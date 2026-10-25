@@ -1,0 +1,128 @@
+@if (errorMessage()) {
+  <div class="alert reveal" role="alert">
+    <span class="alert-glyph" aria-hidden="true">!</span>
+    <span>{{ errorMessage() }}</span>
+  </div>
+}
+
+<section class="workspace">
+  <div class="primary-column">
+    <div class="mode-strip reveal reveal-delay-1">
+      <div>
+        <span class="section-kicker">Game mode</span>
+        <strong>{{ game() ? (game()!.gameMode | gameModeLabel) : 'Loading' }}</strong>
+      </div>
+      <div class="mode-options" role="group" aria-label="Game mode">
+        <button type="button" [class.is-active]="game()?.gameMode === 'TwoPlayer'" (click)="startGame('TwoPlayer')">Two player</button>
+        <button type="button" [class.is-active]="game()?.gameMode === 'Computer'" (click)="startGame('Computer')">Vs computer</button>
+      </div>
+    </div>
+
+    <div class="board-shell reveal reveal-delay-2">
+      <div class="board-core">
+        <div class="board-heading">
+          <div>
+            <span class="section-kicker">Current state</span>
+            <h2>{{ statusTitle() }}</h2>
+          </div>
+          <span class="turn-chip" [class.is-complete]="game()?.status !== 'InProgress'">
+            <span class="chip-dot" aria-hidden="true"></span>{{ statusEyebrow() }}
+          </span>
+        </div>
+
+        <div class="board" role="grid" aria-label="Tic Tac Toe board">
+          @for (cellIndex of cells; track cellIndex) {
+            <button
+              type="button"
+              class="cell"
+              [class.is-winning]="isWinningCell(cellIndex)"
+              [class.is-filled]="game()?.board?.[cellIndex]"
+              [class.mark-x]="game()?.board?.[cellIndex] === 'X'"
+              [class.mark-o]="game()?.board?.[cellIndex] === 'O'"
+              [disabled]="busy() || game()?.status !== 'InProgress' || game()?.board?.[cellIndex] !== null"
+              [attr.aria-label]="game()?.board?.[cellIndex] ? 'Occupied by ' + game()?.board?.[cellIndex] : 'Play ' + (cellIndex | boardPosition)"
+              (click)="play(cellIndex)">
+              @if (game()?.board?.[cellIndex]; as player) {
+                <span class="cell-mark">{{ player }}</span>
+              } @else {
+                <span class="cell-coordinate">0{{ cellIndex + 1 }}</span>
+              }
+            </button>
+          }
+        </div>
+
+        <div class="board-footer">
+          <div class="legend">
+            <span><i class="legend-mark legend-x">X</i> Player X</span>
+            <span><i class="legend-mark legend-o">O</i> {{ game()?.gameMode === 'Computer' ? 'Computer O' : 'Player O' }}</span>
+          </div>
+          <span class="move-count">{{ game()?.moves?.length ?? 0 }}/9 moves</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions reveal reveal-delay-3">
+      <button class="action-button action-primary group" type="button" [disabled]="busy() || !game()" (click)="resetGame()">
+        <span>Reset game</span>
+        <span class="action-icon" aria-hidden="true">
+          <svg viewBox="0 0 20 20" fill="none"><path d="M4.5 7.25A6 6 0 1 1 4.05 11" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/><path d="M4.5 4.25v3h3" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </button>
+      <button class="action-button action-secondary group" type="button" [disabled]="busy() || !game() || game()!.moves.length === 0 || game()!.status !== 'InProgress'" (click)="undo()">
+        <span>Undo last move</span>
+        <span class="action-icon" aria-hidden="true">
+          <svg viewBox="0 0 20 20" fill="none"><path d="M5 6.25h9.5a2 2 0 0 1 2 2V12a2 2 0 0 1-2 2H9" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"/><path d="m8 3.5-3 2.75 3 2.75" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+      </button>
+    </div>
+    <p class="undo-note">Undo removes one move in two-player mode, or the human/computer pair when playing solo.</p>
+  </div>
+
+  <aside class="secondary-column">
+    <section class="side-card scoreboard-card reveal reveal-delay-1">
+      <div class="card-heading">
+        <div>
+          <span class="section-kicker">Session scoreboard</span>
+          <h2>Keep the count.</h2>
+        </div>
+        <span class="card-index">01</span>
+      </div>
+      <div class="score-grid">
+        <div class="score-item score-x"><span>X wins</span><strong>{{ scoreboard().xWins | number }}</strong></div>
+        <div class="score-item score-o"><span>O wins</span><strong>{{ scoreboard().oWins | number }}</strong></div>
+        <div class="score-item score-draw"><span>Draws</span><strong>{{ scoreboard().draws | number }}</strong></div>
+      </div>
+      <button class="text-button" type="button" [disabled]="busy()" (click)="resetScoreboard()">Reset scoreboard <span aria-hidden="true">↗</span></button>
+    </section>
+
+    <section class="side-card history-card reveal reveal-delay-2">
+      <div class="card-heading">
+        <div>
+          <span class="section-kicker">Move ledger</span>
+          <h2>Every choice, logged.</h2>
+        </div>
+        <span class="card-index">02</span>
+      </div>
+      <div class="history-table" role="table" aria-label="Move history">
+        <div class="history-row history-header" role="row"><span>Move</span><span>Player</span><span>Position</span></div>
+        @if (!game()?.moves?.length) {
+          <div class="empty-history">The ledger is waiting for the opening move.</div>
+        } @else {
+          @for (move of game()!.moves; track move.moveNumber) {
+            <div class="history-row" role="row">
+              <span class="move-number">{{ move.moveNumber.toString().padStart(2, '0') }}</span>
+              <span class="history-player" [class.player-x]="move.player === 'X'" [class.player-o]="move.player === 'O'">{{ move.player }}</span>
+              <span>{{ move.cellIndex | boardPosition }}</span>
+            </div>
+          }
+        }
+      </div>
+    </section>
+
+    <section class="side-card principle-card reveal reveal-delay-3">
+      <span class="section-kicker">Rules of play</span>
+      <p>Winning lines glow. Completed games lock. The server decides what counts.</p>
+      <span class="principle-mark" aria-hidden="true">03 / 03</span>
+    </section>
+  </aside>
+</section>

@@ -1,0 +1,43 @@
+$colors: (
+  app-bg: #08090d,
+  app-text: #f6f7f1,
+  text-strong: #f5f5ee,
+  text: #d9dfe7,
+  text-muted: #a9b2bf,
+  text-subtle: #94a0af,
+  text-faint: #6d7281,
+  text-dim: #566171,
+  border: rgba(255, 255, 255, 0.09),
+  border-soft: rgba(255, 255, 255, 0.055),
+  surface: rgba(255, 255, 255, 0.035),
+  surface-raised: rgba(12, 14, 21, 0.72),
+  surface-solid: #0d1017,
+  control-surface: rgba(0, 0, 0, 0.22),
+  shadow: rgba(0, 0, 0, 0.24),
+  shadow-deep: rgba(0, 0, 0, 0.16),
+  inset: rgba(255, 255, 255, 0.04),
+  accent: #d7ff66,
+  accent-contrast: #10140e,
+  accent-soft: rgba(215, 255, 102, 0.08),
+  accent-grid: rgba(215, 255, 102, 0.13),
+  active: #e9efdf,
+  active-contrast: #141911,
+  player-x: #d7ff66,
+  player-o: #8fc8ff,
+  draw: #ffb77d,
+  danger: #ff9475,
+  danger-text: #ffbca8,
+  danger-soft: rgba(255, 148, 117, 0.09),
+  cell: #151a22,
+  cell-hover: #1d2530,
+  cell-text: #f5f7ed,
+  winning-text: #0b0f0d,
+  glow-one: rgba(74, 96, 142, 0.16),
+  glow-two: rgba(87, 67, 105, 0.13)
+);
+
+@mixin emit-theme {
+  @each $name, $value in $colors {
+    --color-#{$name}: #{$value};
+  }
+}

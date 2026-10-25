@@ -1,0 +1,61 @@
+<section class="home-page">
+  <div class="home-copy reveal reveal-delay-1">
+    <span class="home-eyebrow">A small game, played precisely</span>
+    <h1>Read the<br /><em>line.</em></h1>
+    <p class="home-intro">One board. Nine decisions. Choose your mode and let the server keep the match accountable.</p>
+  </div>
+
+  <div class="home-launch reveal reveal-delay-2" [appStopOutsideClick]="busy()">
+    <div class="home-launch-heading">
+      <div>
+        <span class="section-kicker">Start a match</span>
+        <h2>Choose your opponent.</h2>
+      </div>
+      <span class="card-index">01 / 02</span>
+    </div>
+
+    <div class="home-modes" role="radiogroup" aria-label="Choose game mode">
+      <button
+        class="home-mode"
+        type="button"
+        role="radio"
+        [attr.aria-checked]="selectedMode() === 'TwoPlayer'"
+        [class.is-selected]="selectedMode() === 'TwoPlayer'"
+        (click)="selectMode('TwoPlayer')">
+        <span class="home-mode-mark">X/O</span>
+        <span>
+          <strong>Two player</strong>
+          <small>Take turns on the same board.</small>
+        </span>
+        <span class="home-mode-arrow" aria-hidden="true">↗</span>
+      </button>
+      <button
+        class="home-mode"
+        type="button"
+        role="radio"
+        [attr.aria-checked]="selectedMode() === 'Computer'"
+        [class.is-selected]="selectedMode() === 'Computer'"
+        (click)="selectMode('Computer')">
+        <span class="home-mode-mark">X/AI</span>
+        <span>
+          <strong>Vs computer</strong>
+          <small>Play X against the server's O.</small>
+        </span>
+        <span class="home-mode-arrow" aria-hidden="true">↗</span>
+      </button>
+    </div>
+
+    <button class="start-button" type="button" [disabled]="busy()" (click)="startGame()">
+      <span>{{ busy() ? 'Opening session…' : 'Start the game' }}</span>
+      <span aria-hidden="true">↗</span>
+    </button>
+    <p class="home-footnote">Your session is created and held by the API before the board opens.</p>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="alert reveal" role="alert">
+      <span class="alert-glyph" aria-hidden="true">!</span>
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+</section>

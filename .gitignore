@@ -1,28 +1,95 @@
-# Angular specific
-/dist/
-/out-tsc/
-/tmp/
-/coverage/
-/e2e/test-output/
-/.angular/
-.angular/
+# ==============================================================================
+# .NET Core (Backend)
+# ==============================================================================
+# Build results
+[Dd]ebug/
+[Dd]ebugPS/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Cc]ontentFiles/
+[Pp]lugins/
 
-# Node modules and dependency files
-/node_modules/
-/package-lock.json
-/yarn.lock
+# Visual Studio / VS Code working files
+.vs/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
 
-# Environment files
-/.env
+# Rider / JetBrains
+.idea/
+*.sln.iml
 
-# Angular CLI and build artefacts
-/.angular-cli.json
-/.ng/
+# User-specific files & local settings
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+appsettings.Development.json
+appsettings.Local.json
 
-# TypeScript cache
-*.tsbuildinfo
+# Publishing / Package outputs
+*.publish.xml
+*.pubxml
+*.pubxml.user
+publish/
 
-# Logs
+# EF Core Migrations & Bundles
+efbundle
+*.db
+*.sqlite
+
+# ==============================================================================
+# Angular (Frontend)
+# ==============================================================================
+# Dependencies
+frontend/node_modules/
+frontend/dist
+frontend/bazel-out
+frontend/dist-server
+frontend/documentation
+
+# Cache and temporary folders
+frontend/.angular/
+frontend/.cache/
+.sass-cache/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+
+# IDEs and editors (Frontend specific)
+.idea/
+.project
+.classpath
+.cproject
+.settings/
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Testing / Coverage
+frontend/coverage/
+frontend/.nyc_output
+
+# Local environment overrides
+.env
+.env.local
+.env.*.local
+
+# ==============================================================================
+# Combined Deployments / Output Intersections
+# ==============================================================================
+**/wwwroot/dist/
+**/wwwroot/browser/
+backend/TicTacToe.Api/wwwroot/*

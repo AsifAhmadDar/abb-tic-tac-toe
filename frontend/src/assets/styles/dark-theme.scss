@@ -1,0 +1,6 @@
+@use './dark-variables' as variables;
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  @include variables.emit-theme;
+}

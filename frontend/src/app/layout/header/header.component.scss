@@ -1,0 +1,106 @@
+.topbar {
+  position: sticky;
+  top: 1rem;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: min(100%, 1240px);
+  margin: 0 auto;
+  padding: 0.75rem 0.9rem 0.75rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface-raised);
+  box-shadow: 0 18px 60px var(--color-shadow);
+  backdrop-filter: blur(24px);
+}
+
+.brand-lockup,
+.header-actions,
+.connection-state {
+  display: flex;
+  align-items: center;
+}
+
+.brand-lockup { gap: 0.7rem; }
+.header-actions { gap: 1rem; }
+
+.brand-mark {
+  display: block;
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+}
+
+.brand-name,
+.brand-caption,
+.connection-state {
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.brand-name {
+  color: var(--color-app-text);
+  font-size: 0.7rem;
+  font-weight: 750;
+  letter-spacing: 0.2em;
+}
+
+.brand-caption {
+  color: var(--color-text-faint);
+  font-size: 0.57rem;
+}
+
+.connection-state {
+  gap: 0.5rem;
+  color: var(--color-text-muted);
+  font-size: 0.58rem;
+}
+
+.signal-dot {
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow: 0 0 0 4px var(--color-accent-soft), 0 0 18px var(--color-accent);
+}
+
+.connection-state.is-offline .signal-dot {
+  background: var(--color-danger);
+  box-shadow: 0 0 0 4px var(--color-danger-soft), 0 0 18px var(--color-danger);
+}
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2rem;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-control-surface);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: color 450ms cubic-bezier(0.32, 0.72, 0, 1), background-color 450ms cubic-bezier(0.32, 0.72, 0, 1), border-color 450ms cubic-bezier(0.32, 0.72, 0, 1), transform 450ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.theme-toggle:hover {
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+  color: var(--color-app-text);
+  transform: translateY(-1px);
+}
+
+.theme-toggle-icon {
+  color: var(--color-accent);
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+@media (max-width: 767px) {
+  .topbar { top: 0.6rem; }
+  .brand-caption { display: none; }
+}

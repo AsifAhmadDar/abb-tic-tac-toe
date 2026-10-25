@@ -1,0 +1,53 @@
+@use './assets/styles/dark-theme';
+@use './assets/styles/light-theme';
+
+:root {
+  font-family: 'Geist', 'Satoshi', system-ui, sans-serif;
+  color: var(--color-app-text);
+  background: var(--color-app-bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* { box-sizing: border-box; }
+
+html {
+  min-width: 320px;
+  background: var(--color-app-bg);
+}
+
+body {
+  min-width: 320px;
+  min-height: 100dvh;
+  margin: 0;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at 8% 14%, var(--color-glow-one), transparent 25rem),
+    radial-gradient(circle at 92% 48%, var(--color-glow-two), transparent 23rem),
+    var(--color-app-bg);
+  color: var(--color-app-text);
+  transition: background-color 450ms cubic-bezier(0.32, 0.72, 0, 1), color 450ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+body::before {
+  position: fixed;
+  z-index: 1;
+  inset: 0;
+  pointer-events: none;
+  content: '';
+  opacity: 0.055;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+button { font: inherit; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+  }
+}
