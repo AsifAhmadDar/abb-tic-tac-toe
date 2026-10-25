@@ -24,8 +24,8 @@ export class GameApiService {
     return this.http.post<GameState>(`${this.apiUrl}/games/undo`, {});
   }
 
-  resetGame(): Observable<GameState> {
-    return this.http.post<GameState>(`${this.apiUrl}/games/reset`, {});
+  resetGame(mode?: GameMode): Observable<GameState> {
+    return this.http.post<GameState>(`${this.apiUrl}/games/reset`, mode ? { mode } : {});
   }
 
   getScoreboard(): Observable<Scoreboard> {

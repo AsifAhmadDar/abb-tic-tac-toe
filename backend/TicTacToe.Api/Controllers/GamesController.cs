@@ -30,8 +30,8 @@ public sealed class GamesController(IGameService gameService) : ControllerBase
         Ok(gameService.Undo(GetCurrentGameId()));
 
     [HttpPost("reset")]
-    public ActionResult<GameStateResponse> Reset() =>
-        Ok(gameService.ResetGame(GetCurrentGameId()));
+    public ActionResult<GameStateResponse> Reset([FromBody] ResetGameRequest? request) =>
+        Ok(gameService.ResetGame(GetCurrentGameId(), request?.Mode));
 
     private Guid GetCurrentGameId()
         => SessionIdHeader.GetRequired(Request.Headers);

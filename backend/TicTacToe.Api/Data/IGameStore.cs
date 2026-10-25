@@ -6,4 +6,5 @@ public interface IGameStore
 {
     GameSession Create(Guid gameId, GameMode mode);
     GameSession Get(Guid gameId);
+    int RemoveExpiredSessions(DateTimeOffset now);
 }

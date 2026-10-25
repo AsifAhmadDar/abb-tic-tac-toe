@@ -23,15 +23,24 @@ public sealed class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Ex
         context.Response.ContentType = "application/problem+json";
         context.Response.StatusCode = exception switch
         {
+            GameSessionExpiredException => StatusCodes.Status401Unauthorized,
             GameNotFoundException => StatusCodes.Status404NotFound,
             GameRuleException ruleException => ruleException.StatusCode,
             _ => StatusCodes.Status500InternalServerError
         };
 
-        var message = exception is GameNotFoundException or GameRuleException
+        var code = exception switch
+        {
+            GameSessionExpiredException => "SESSION_EXPIRED",
+            GameNotFoundException => "SESSION_NOT_FOUND",
+            GameRuleException => "GAME_RULE_VIOLATION",
+            _ => "INTERNAL_ERROR"
+        };
+
+        var message = exception is GameSessionExpiredException or GameNotFoundException or GameRuleException
             ? exception.Message
             : "The game service could not complete that request.";
 
-        await context.Response.WriteAsync(JsonSerializer.Serialize(new { message }));
+        await context.Response.WriteAsync(JsonSerializer.Serialize(new { code, message }));
     }
 }

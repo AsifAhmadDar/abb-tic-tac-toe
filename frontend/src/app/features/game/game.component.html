@@ -13,8 +13,8 @@
         <strong>{{ game() ? (game()!.gameMode | gameModeLabel) : 'Loading' }}</strong>
       </div>
       <div class="mode-options" role="group" aria-label="Game mode">
-        <button type="button" [class.is-active]="game()?.gameMode === 'TwoPlayer'" (click)="startGame('TwoPlayer')">Two player</button>
-        <button type="button" [class.is-active]="game()?.gameMode === 'Computer'" (click)="startGame('Computer')">Vs computer</button>
+        <button type="button" [disabled]="busy() || !game() || game()!.gameMode === 'TwoPlayer'" [class.is-active]="game()?.gameMode === 'TwoPlayer'" (click)="requestModeChange('TwoPlayer')">Two player</button>
+        <button type="button" [disabled]="busy() || !game() || game()!.gameMode === 'Computer'" [class.is-active]="game()?.gameMode === 'Computer'" (click)="requestModeChange('Computer')">Vs computer</button>
       </div>
     </div>
 
@@ -126,3 +126,12 @@
     </section>
   </aside>
 </section>
+
+<app-confirmation-popup
+  [open]="pendingMode() !== null"
+  title="Change game mode?"
+  message="This game is still in progress. Changing the mode will reset the current board and move history. Your session scoreboard will be kept."
+  confirmLabel="Reset and change"
+  cancelLabel="Keep playing"
+  (confirmed)="confirmModeChange()"
+  (cancelled)="cancelModeChange()" />

@@ -3,12 +3,19 @@ using TicTacToe.Api.Dtos.Requests;
 using TicTacToe.Api.Dtos.Responses;
 using TicTacToe.Api.Exceptions;
 using TicTacToe.Api.Models;
+using TicTacToe.Api.Options;
 using TicTacToe.Api.Rules;
+using Microsoft.Extensions.Options;
 
 namespace TicTacToe.Api.Services.Implementations;
 
-public sealed class GameService(IGameStore gameStore, IScoreboardService scoreboardService) : IGameService
+public sealed class GameService(
+    IGameStore gameStore,
+    IScoreboardService scoreboardService,
+    IOptions<GameSessionOptions> sessionOptions) : IGameService
 {
+    private readonly TimeSpan sessionLifetime = TimeSpan.FromMinutes(sessionOptions.Value.ExpirationMinutes);
+
     public GameStateResponse CreateGame(Guid sessionId, GameMode mode) => Snapshot(gameStore.Create(sessionId, mode));
 
     public GameStateResponse GetGame(Guid gameId) =>
@@ -17,14 +24,12 @@ public sealed class GameService(IGameStore gameStore, IScoreboardService scorebo
     public GameStateResponse MakeMove(Guid gameId, MoveRequest request) =>
         ExecuteWithGame(gameId, game =>
         {
-            if (!TryApplyPlayerMove(game, request))
-            {
-                return Snapshot(game);
-            }
+            ValidatePlayerMove(game, request);
+            ApplyMove(game, request.Player, request.CellIndex);
 
             if (game.GameMode == GameMode.Computer && game.Status == GameStatus.InProgress)
             {
-                TryApplyMove(game, Player.O, ComputerMoveSelector.SelectMove(game.Board));
+                ApplyMove(game, Player.O, ComputerMoveSelector.SelectMove(game.Board));
             }
 
             return Snapshot(game);
@@ -52,10 +57,10 @@ public sealed class GameService(IGameStore gameStore, IScoreboardService scorebo
             return Snapshot(game);
         });
 
-    public GameStateResponse ResetGame(Guid gameId) =>
+    public GameStateResponse ResetGame(Guid gameId, GameMode? mode = null) =>
         ExecuteWithGame(gameId, game =>
         {
-            game.Reset();
+            game.Reset(mode ?? game.GameMode, DateTimeOffset.UtcNow.Add(sessionLifetime));
             return Snapshot(game);
         });
 
@@ -70,38 +75,36 @@ public sealed class GameService(IGameStore gameStore, IScoreboardService scorebo
         }
     }
 
-    private bool TryApplyPlayerMove(GameSession game, MoveRequest request)
+    private static void ValidatePlayerMove(GameSession game, MoveRequest request)
     {
         if (game.Status != GameStatus.InProgress)
         {
-            return false;
+            throw new GameRuleException("Moves are unavailable after the game is complete.", 409);
         }
 
         if (request.CellIndex is < 0 or > 8)
         {
-            return false;
+            throw new GameRuleException("The selected cell is outside the board.");
         }
 
         if (game.GameMode == GameMode.Computer && request.Player != Player.X)
         {
-            return false;
+            throw new GameRuleException("Only Player X can submit moves in computer mode.", 409);
         }
 
-        return TryApplyMove(game, request.Player, request.CellIndex);
+        if (request.Player != game.CurrentPlayer)
+        {
+            throw new GameRuleException($"It is Player {game.CurrentPlayer}'s turn.", 409);
+        }
+
+        if (game.Board[request.CellIndex] is not null)
+        {
+            throw new GameRuleException("The selected cell is already occupied.", 409);
+        }
     }
 
-    private bool TryApplyMove(GameSession game, Player player, int cellIndex)
+    private void ApplyMove(GameSession game, Player player, int cellIndex)
     {
-        if (player != game.CurrentPlayer)
-        {
-            return false;
-        }
-
-        if (game.Board[cellIndex] is not null)
-        {
-            return false;
-        }
-
         game.Board[cellIndex] = player;
         game.Moves.Add(new GameMove(player, cellIndex));
 
@@ -113,18 +116,17 @@ public sealed class GameService(IGameStore gameStore, IScoreboardService scorebo
             game.WinningCells.Clear();
             game.WinningCells.AddRange(winningLine);
             RecordResult(game);
-            return true;
+            return;
         }
 
         if (GameRules.IsDraw(game.Board))
         {
             game.Status = GameStatus.Draw;
             RecordResult(game);
-            return true;
+            return;
         }
 
         game.CurrentPlayer = player == Player.X ? Player.O : Player.X;
-        return true;
     }
 
     private void RecordResult(GameSession game)
@@ -154,5 +156,6 @@ public sealed class GameService(IGameStore gameStore, IScoreboardService scorebo
                 move.CellIndex / 3 + 1,
                 move.CellIndex % 3 + 1))
             .ToArray(),
-        scoreboardService.Get());
+        scoreboardService.Get(),
+        game.ExpiresAt);
 }

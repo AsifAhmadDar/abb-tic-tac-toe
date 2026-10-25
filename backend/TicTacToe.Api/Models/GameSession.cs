@@ -1,9 +1,10 @@
 namespace TicTacToe.Api.Models;
 
-public sealed class GameSession(Guid gameId, GameMode gameMode)
+public sealed class GameSession(Guid gameId, GameMode gameMode, DateTimeOffset expiresAt)
 {
     public Guid GameId { get; } = gameId;
-    public GameMode GameMode { get; } = gameMode;
+    public GameMode GameMode { get; private set; } = gameMode;
+    public DateTimeOffset ExpiresAt { get; private set; } = expiresAt;
     public object SyncRoot { get; } = new();
     public Player?[] Board { get; } = new Player?[9];
     internal List<GameMove> Moves { get; } = [];
@@ -31,8 +32,10 @@ public sealed class GameSession(Guid gameId, GameMode gameMode)
             : Moves.LastOrDefault()?.Player == Player.X ? Player.O : Player.X;
     }
 
-    public void Reset()
+    public void Reset(GameMode mode, DateTimeOffset expiresAt)
     {
+        GameMode = mode;
+        ExpiresAt = expiresAt;
         Array.Fill(Board, null);
         Moves.Clear();
         WinningCells.Clear();

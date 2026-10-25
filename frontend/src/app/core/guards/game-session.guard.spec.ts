@@ -19,7 +19,10 @@ describe('gameSessionGuard', () => {
     const http = TestBed.inject(HttpTestingController);
     const session = TestBed.inject(GameSessionService);
     session.start();
-    const game = { gameId: 'game-1' } as GameState;
+    const game = {
+      gameId: 'game-1',
+      sessionExpiresAt: new Date(Date.now() + 60_000).toISOString()
+    } as GameState;
     let result: boolean | UrlTree | undefined;
 
     TestBed.runInInjectionContext(() => {

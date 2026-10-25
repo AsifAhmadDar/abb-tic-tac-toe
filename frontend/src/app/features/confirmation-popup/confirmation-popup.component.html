@@ -1,0 +1,24 @@
+<dialog
+  #dialog
+  class="confirmation-dialog"
+  aria-modal="true"
+  [attr.aria-labelledby]="'confirmation-title'"
+  [attr.aria-describedby]="'confirmation-message'"
+  (cancel)="handleCancel($event)"
+  (click)="handleDialogClick($event)">
+  <div class="confirmation-panel">
+    <div class="confirmation-mark" aria-hidden="true">!</div>
+    <div class="confirmation-copy">
+      <h2 id="confirmation-title">{{ title() }}</h2>
+      <p id="confirmation-message">{{ message() }}</p>
+    </div>
+    <div class="confirmation-actions">
+      <button class="confirmation-button confirmation-secondary" type="button" autofocus (click)="cancel()">
+        {{ cancelLabel() }}
+      </button>
+      <button class="confirmation-button confirmation-primary" type="button" (click)="confirm()">
+        {{ confirmLabel() }}
+      </button>
+    </div>
+  </div>
+</dialog>

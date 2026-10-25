@@ -26,6 +26,11 @@ export interface GameState {
   winningCells: number[];
   moves: MoveRecord[];
   scoreboard: Scoreboard;
+  sessionExpiresAt: string;
+}
+
+export interface SessionDetails {
+  expiresAt: string;
 }
 
 export interface MoveRequest {

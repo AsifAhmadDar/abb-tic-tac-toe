@@ -48,6 +48,11 @@ describe('GameApiService', () => {
     move.flush(response);
     http.expectOne('/api/games/undo').flush(response);
     http.expectOne('/api/games/reset').flush(response);
+
+    service.resetGame('Computer').subscribe();
+    const modeReset = http.expectOne('/api/games/reset');
+    expect(modeReset.request.body).toEqual({ mode: 'Computer' });
+    modeReset.flush(response);
   });
 
   it('reads the SESSION-ID-bound current game', () => {

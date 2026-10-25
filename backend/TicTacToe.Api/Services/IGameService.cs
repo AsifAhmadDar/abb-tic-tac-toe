@@ -10,5 +10,5 @@ public interface IGameService
     GameStateResponse GetGame(Guid gameId);
     GameStateResponse MakeMove(Guid gameId, MoveRequest request);
     GameStateResponse Undo(Guid gameId);
-    GameStateResponse ResetGame(Guid gameId);
+    GameStateResponse ResetGame(Guid gameId, GameMode? mode = null);
 }

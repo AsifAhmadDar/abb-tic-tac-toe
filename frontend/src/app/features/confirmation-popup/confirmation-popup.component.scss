@@ -1,0 +1,67 @@
+:host {
+  display: contents;
+}
+
+.confirmation-dialog {
+  width: min(calc(100% - 2rem), 30rem);
+  max-width: 30rem;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 1.5rem;
+  background: var(--color-surface-solid);
+  color: var(--color-app-text);
+  box-shadow: 0 2rem 7rem var(--color-shadow-deep), inset 0 1px 0 var(--color-inset);
+  animation: confirmation-enter 450ms cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+.confirmation-dialog::backdrop {
+  background: var(--color-backdrop);
+  backdrop-filter: blur(0.5rem) saturate(0.75);
+  animation: backdrop-enter 300ms ease-out both;
+}
+
+.confirmation-panel {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1rem;
+  padding: clamp(1.25rem, 4vw, 2rem);
+}
+
+.confirmation-mark {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.confirmation-copy { min-width: 0; }
+.confirmation-copy h2 { margin-top: 0; color: var(--color-app-text); font-size: clamp(1.3rem, 3vw, 1.7rem); letter-spacing: -0.05em; }
+.confirmation-copy p { margin-top: 0.8rem; color: var(--color-text-muted); font-size: 0.8rem; line-height: 1.65; }
+
+.confirmation-actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.6rem; }
+.confirmation-button { min-height: 2.7rem; padding: 0.65rem 0.9rem; border: 0; border-radius: 999px; cursor: pointer; font: inherit; font-size: 0.72rem; transition: transform 450ms cubic-bezier(0.32, 0.72, 0, 1), filter 450ms cubic-bezier(0.32, 0.72, 0, 1); }
+.confirmation-button:hover { filter: brightness(1.08); transform: translateY(-1px); }
+.confirmation-button:active { transform: scale(0.97); }
+.confirmation-primary { background: var(--color-accent); color: var(--color-accent-contrast); }
+.confirmation-secondary { background: var(--color-control-surface); color: var(--color-text); }
+
+@keyframes confirmation-enter {
+  from { opacity: 0; transform: translateY(1rem) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes backdrop-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (max-width: 520px) {
+  .confirmation-panel { grid-template-columns: 1fr; }
+  .confirmation-actions { justify-content: stretch; }
+  .confirmation-button { flex: 1; }
+}

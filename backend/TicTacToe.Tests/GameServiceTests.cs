@@ -6,6 +6,8 @@ using TicTacToe.Api.Data.Implementations;
 using TicTacToe.Api.Exceptions;
 using TicTacToe.Api.Services;
 using TicTacToe.Api.Services.Implementations;
+using Microsoft.Extensions.Options;
+using TicTacToe.Api.Options;
 
 namespace TicTacToe.Tests;
 
@@ -25,18 +27,47 @@ public sealed class GameServiceTests
     }
 
     [Fact]
-    public void Invalid_move_does_not_change_state()
+    public void Occupied_cell_is_rejected_without_changing_state()
     {
         var service = CreateService();
         var game = CreateGame(service, GameMode.TwoPlayer);
         service.MakeMove(game.GameId, new MoveRequest(Player.X, 0));
 
-        var noOp = service.MakeMove(game.GameId, new MoveRequest(Player.O, 0));
+        var exception = Assert.Throws<GameRuleException>(() =>
+            service.MakeMove(game.GameId, new MoveRequest(Player.O, 0)));
 
         var current = service.GetGame(game.GameId);
-        Assert.Equal(current.Board, noOp.Board);
+        Assert.Equal("The selected cell is already occupied.", exception.Message);
         Assert.Equal(Player.O, current.CurrentPlayer);
         Assert.Single(current.Moves);
+    }
+
+    [Fact]
+    public void Outside_board_move_is_rejected()
+    {
+        var service = CreateService();
+        var game = CreateGame(service, GameMode.TwoPlayer);
+
+        var exception = Assert.Throws<GameRuleException>(() =>
+            service.MakeMove(game.GameId, new MoveRequest(Player.X, 9)));
+
+        Assert.Equal("The selected cell is outside the board.", exception.Message);
+        Assert.Equal(400, exception.StatusCode);
+        Assert.Empty(service.GetGame(game.GameId).Moves);
+    }
+
+    [Fact]
+    public void Wrong_player_is_rejected()
+    {
+        var service = CreateService();
+        var game = CreateGame(service, GameMode.TwoPlayer);
+
+        var exception = Assert.Throws<GameRuleException>(() =>
+            service.MakeMove(game.GameId, new MoveRequest(Player.O, 0)));
+
+        Assert.Equal("It is Player X's turn.", exception.Message);
+        Assert.Equal(409, exception.StatusCode);
+        Assert.Empty(service.GetGame(game.GameId).Moves);
     }
 
     [Fact]
@@ -112,6 +143,24 @@ public sealed class GameServiceTests
     }
 
     [Fact]
+    public void Changing_mode_reuses_session_resets_game_and_renews_expiry()
+    {
+        var service = CreateService();
+        var game = CreateGame(service, GameMode.TwoPlayer);
+        service.MakeMove(game.GameId, new MoveRequest(Player.X, 0));
+
+        var changed = service.ResetGame(game.GameId, GameMode.Computer);
+
+        Assert.Equal(game.GameId, changed.GameId);
+        Assert.Equal(GameMode.Computer, changed.GameMode);
+        Assert.Equal(GameStatus.InProgress, changed.Status);
+        Assert.Equal(Player.X, changed.CurrentPlayer);
+        Assert.All(changed.Board, Assert.Null);
+        Assert.Empty(changed.Moves);
+        Assert.True(changed.SessionExpiresAt > game.SessionExpiresAt);
+    }
+
+    [Fact]
     public void Undo_two_player_removes_one_move_and_restores_turn()
     {
         var service = CreateService();
@@ -162,15 +211,22 @@ public sealed class GameServiceTests
         Play(service, game.GameId, Player.X, 1, Player.O, 4);
         var won = service.MakeMove(game.GameId, new MoveRequest(Player.X, 2));
 
-        var noOp = service.MakeMove(game.GameId, new MoveRequest(Player.O, 5));
-        Assert.Equal(won.Board, noOp.Board);
-        Assert.Equal(won.Moves, noOp.Moves);
+        var exception = Assert.Throws<GameRuleException>(() =>
+            service.MakeMove(game.GameId, new MoveRequest(Player.O, 5)));
+        Assert.Equal("Moves are unavailable after the game is complete.", exception.Message);
+        Assert.Equal(409, exception.StatusCode);
+        Assert.Equal(won.Board, service.GetGame(game.GameId).Board);
+        Assert.Equal(won.Moves, service.GetGame(game.GameId).Moves);
         Assert.Equal(1, service.GetGame(game.GameId).Scoreboard.XWins);
         Assert.Throws<GameRuleException>(() => service.Undo(game.GameId));
         Assert.Equal(1, won.Scoreboard.XWins);
     }
 
-    private static IGameService CreateService() => new GameService(new InMemoryGameStore(), new ScoreboardService());
+    private static IGameService CreateService() =>
+        new GameService(
+            new InMemoryGameStore(Options.Create(new GameSessionOptions())),
+            new ScoreboardService(),
+            Options.Create(new GameSessionOptions()));
 
     private static GameStateResponse CreateGame(IGameService service, GameMode mode) =>
         service.CreateGame(Guid.NewGuid(), mode);

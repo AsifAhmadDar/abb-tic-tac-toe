@@ -11,4 +11,5 @@ public sealed record GameStateResponse(
     Player? Winner,
     IReadOnlyList<int> WinningCells,
     IReadOnlyList<MoveRecord> Moves,
-    ScoreboardResponse Scoreboard);
+    ScoreboardResponse Scoreboard,
+    DateTimeOffset SessionExpiresAt);

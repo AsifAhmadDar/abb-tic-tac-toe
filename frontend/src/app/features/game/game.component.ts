@@ -1,16 +1,18 @@
 import { DecimalPipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { BoardPositionPipe } from '@core/pipes/board-position.pipe';
 import { GameModeLabelPipe } from '@core/pipes/game-mode-label.pipe';
 import { GameMode, GameState } from '@core/models/game.models';
 import { GameApiService } from '@core/services/game-api.service';
 import { GameSessionService } from '@core/services/game-session.service';
+import { ConfirmationPopupComponent } from '@features/confirmation-popup/confirmation-popup.component';
 
 @Component({
   selector: 'app-game',
   standalone: true,
-  imports: [DecimalPipe, BoardPositionPipe, GameModeLabelPipe],
+  imports: [DecimalPipe, BoardPositionPipe, GameModeLabelPipe, ConfirmationPopupComponent],
   templateUrl: './game.component.html',
   styleUrl: './game.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -18,21 +20,54 @@ import { GameSessionService } from '@core/services/game-session.service';
 export class GameComponent {
   private readonly api = inject(GameApiService);
   private readonly session = inject(GameSessionService);
+  private readonly router = inject(Router);
+  private readonly sessionExpiryEffect = effect(() => {
+    if (this.session.sessionExpired()) {
+      void this.router.navigateByUrl('/home');
+    }
+  });
 
   readonly cells = Array.from({ length: 9 }, (_, index) => index);
   readonly game = this.session.game;
   readonly scoreboard = signal(this.game()?.scoreboard ?? { xWins: 0, oWins: 0, draws: 0 });
   readonly busy = signal(false);
+  readonly pendingMode = signal<GameMode | null>(null);
   readonly errorMessage = this.session.errorMessage;
 
-  startGame(mode: GameMode): void {
+  requestModeChange(mode: GameMode): void {
+    const game = this.game();
+    if (!game || this.busy() || game.gameMode === mode) {
+      return;
+    }
+
+    if (game.status === 'InProgress') {
+      this.pendingMode.set(mode);
+      return;
+    }
+
+    this.changeMode(mode);
+  }
+
+  confirmModeChange(): void {
+    const mode = this.pendingMode();
+    this.pendingMode.set(null);
+    if (mode) {
+      this.changeMode(mode);
+    }
+  }
+
+  cancelModeChange(): void {
+    this.pendingMode.set(null);
+  }
+
+  private changeMode(mode: GameMode): void {
     if (this.busy()) {
       return;
     }
 
     this.busy.set(true);
     this.session.setError('');
-    this.api.createGame(mode).subscribe({
+    this.api.resetGame(mode).subscribe({
       next: (game) => this.acceptGame(game),
       error: (error: unknown) => this.handleError(error),
       complete: () => this.busy.set(false)
@@ -141,6 +176,11 @@ export class GameComponent {
 
   private handleError(error: unknown): void {
     this.busy.set(false);
+    if (error instanceof HttpErrorResponse &&
+      (error.error?.code === 'SESSION_EXPIRED' || error.error?.code === 'SESSION_NOT_FOUND')) {
+      this.session.expire(error.error.message);
+      return;
+    }
     if (error instanceof HttpErrorResponse && error.error?.message) {
       this.session.setError(error.error.message);
       return;
